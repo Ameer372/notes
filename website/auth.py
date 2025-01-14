@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, render_template, request, flash, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
-from . import db
+from website import db
 from flask_login import login_user, login_required, logout_user, current_user
 
 auth = Blueprint('auth', __name__)
@@ -45,21 +45,24 @@ def sign_up():
         if user:
             flash('Email already exists.', category='error')
         elif len(email) < 4:
-            flash('Email must be grater than 4 characters.', category='error')
+            flash('Email must be greater than 4 characters.', category='error')
         elif len(firstName) < 2:
-            flash('Name must be grater than 2 characters.', category='error')
+            flash('Name must be greater than 2 characters.', category='error')
         elif password1 != password2:
             flash('Passwords don\'t match.', category='error')
         elif len(password1) < 6:
-            flash('Password must be grater than 6 characters.', category='error')
+            flash('Password must be greater than 6 characters.', category='error')
         else:
-            # add user to database
-            new_user = User(email=email, first_name=firstName,
-                            password=generate_password_hash(password1, method='pbkdf2:sha256'))
+            # Add user to database
+            new_user = User(
+                email=email,
+                first_name=firstName,
+                password=generate_password_hash(password1, method='pbkdf2:sha256')
+            )
             db.session.add(new_user)
             db.session.commit()
-            login_user(user, remember=True)
-            flash('Acount created!', category='success')
+            login_user(user=new_user)
+            flash('Account created!', category='success')
             return redirect(url_for('views.home'))
 
     return render_template("sign_up.html", user=current_user)
